@@ -1,5 +1,5 @@
 >>>markdown
-Griffin Linn
+Peace Corps Data Liberation Project: Griffin Linn
 >>>markdown
 In this data project, I am exploring the various differences in resignation reasons among Peace Corps volunteers. There is unfortunately no data on the dates of volunteer resignation, but the reasons themselves, combined with the staunch differences between countries, leads to some interesting inqueries.
 >>>malloy
@@ -17,6 +17,69 @@ source: PeaceCorps is duckdb.table('./Peace_Corps_CSV.csv') extend {
         # percent
         Percentage is Total / all(Total)
 }
+>>>markdown
+Most Compelling Questions:
+>>>markdown
+What are the most common primary reasons for resignation?
+>>>malloy
+# bar_chart
+run: PeaceCorps -> {
+    group_by: Primary where: Primary is not null
+    aggregate: Total
+    order_by: Total desc
+    limit: 10
+}
+>>>markdown
+What are the most common secondary reasons for resignation?
+>>>malloy
+# bar_chart
+run: PeaceCorps -> {
+    group_by: Secondary where: Secondary is not null
+    aggregate: Total
+    order_by: Total desc
+    limit: 10
+}
+>>>markdown
+Which countries had the most resignations?
+>>>malloy
+# bar_chart
+run: PeaceCorps -> {
+    group_by: CountryID
+    aggregate: Total
+    order_by: Total desc
+    limit: 10
+}
+>>>markdown
+What is the percentage distribution of primary resignation reasons?
+>>>malloy
+# line_chart
+run: PeaceCorps -> {
+    group_by: Primary where: Primary is not null
+    aggregate:
+        --Total
+        # percent
+        Percentage
+    order_by: Percentage desc
+}
+>>>markdown
+Which Countries had the highest resignations due to issues with the Peace Corps Policies?
+>>>malloy
+# bar_chart
+run: PeaceCorps -> {
+    group_by: CountryID
+    aggregate:
+        PeaceCorpsTotal is Total where:
+                                    PrimaryCode = 113
+                                    or SecondaryCode = 113
+                                    or PrimaryCode = 114
+                                    or SecondaryCode = 114
+                                    or PrimaryCode = 115
+                                    or SecondaryCode = 115
+    order_by: PeaceCorpsTotal desc
+    limit: 10
+}
+>>>markdown
+Original Setup of the Questions:
 >>>markdown
 Question 1: How many total resignations are there?
 >>>malloy
@@ -347,6 +410,7 @@ run: PeaceCorps -> {
 >>>markdown
 Question 30: Which Countries make up the majority of the issues with the Peace Corps?
 >>>malloy
+
 # bar_chart
 run: PeaceCorps -> {
     group_by: CountryID
