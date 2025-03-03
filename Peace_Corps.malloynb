@@ -1,3 +1,7 @@
+>>>markdown
+Griffin Linn
+>>>markdown
+In this data project, I am exploring the various differences in resignation reasons among Peace Corps volunteers. There is unfortunately no data on the dates of volunteer resignation, but the reasons themselves, combined with the staunch differences between countries, leads to some interesting inqueries.
 >>>malloy
 source: PeaceCorps is duckdb.table('./Peace_Corps_CSV.csv') extend {
     rename:
@@ -30,8 +34,9 @@ run: PeaceCorps -> {
 >>>markdown
 Question 3: What are the most common Primary Reasons for Resignation?
 >>>malloy
+# bar_chart
 run: PeaceCorps -> {
-    group_by: Primary
+    group_by: Primary where: Primary is not null
     aggregate: Total
     order_by: Total desc
     limit: 10
@@ -50,8 +55,9 @@ Question 5: What is the most common Primary reason for each country?
 >>>malloy
 run: PeaceCorps -> {
     group_by: CountryID
+    # bar_chart
     nest: Reasoning is {
-        group_by: Primary
+        group_by: Primary where: Primary is not null
         aggregate: Total
         order_by: Total desc
         limit: 3
@@ -61,8 +67,9 @@ run: PeaceCorps -> {
 >>>markdown
 Question 6: What are the most common Secondary Reasonings for Resignation?
 >>>malloy
+# bar_chart
 run: PeaceCorps -> {
-    group_by: Secondary
+    group_by: Secondary where: Secondary is not null
     aggregate: Total
     order_by: Total desc
     limit: 10
@@ -82,7 +89,7 @@ Question 8: What are the most common secondary reasonings by country?
 run: PeaceCorps -> {
     group_by: CountryID
     nest: Reasoning is {
-        group_by: Secondary
+        group_by: Secondary where: Secondary is not null
         aggregate: Total
         order_by: Total desc
         limit: 3
@@ -92,6 +99,7 @@ run: PeaceCorps -> {
 >>>markdown
 Question 9: What countries have the most resignations?
 >>>malloy
+# bar_chart
 run: PeaceCorps -> {
     group_by: CountryID
     aggregate: Total
@@ -111,12 +119,12 @@ run: PeaceCorps -> {
 Question 11: What are the most common Secondary Reasonings for each Primary Reasoning?
 >>>malloy
 run: PeaceCorps -> {
-    group_by: Primary
+    group_by: Primary where: Primary is not null
     aggregate: Total
     order_by: Total desc
     limit: 10
     nest: SecondaryReasoning is {
-        group_by: Secondary
+        group_by: Secondary where: Secondary is not null
         aggregate: Total
         order_by: Total desc
         limit: 5
@@ -125,6 +133,7 @@ run: PeaceCorps -> {
 >>>markdown
 Question 13: What countries had the highest counts of Alcohol being a resignation reasoning?
 >>>malloy
+# bar_chart
 run: PeaceCorps -> {
     group_by: CountryID
     aggregate:
@@ -141,13 +150,13 @@ run: PeaceCorps -> {
 Question 13: Of the top 5 primary reasons for resignation, what countries appear the most?
 >>>malloy
 run: PeaceCorps -> {
-    group_by: Primary
+    group_by: Primary where: Primary is not null
     aggregate: Total
+    # bar_chart
     nest: Country is {
         group_by: CountryID
         aggregate: Total
         order_by: Total desc
-        limit: 5
     }
     order_by: Total desc
     limit: 5
@@ -156,8 +165,9 @@ run: PeaceCorps -> {
 Question 14: Of the top 5 primary reasons, what countries appear the least?
 >>>malloy
 run: PeaceCorps -> {
-    group_by: Primary
+    group_by: Primary where: Primary is not null
     aggregate: Total
+    --# bar_chart
     nest: Country is {
         group_by: CountryID
         aggregate: Total
@@ -174,11 +184,11 @@ run: PeaceCorps -> {
     group_by: CountryID
     aggregate: Total
     nest: Primary_Reasoning is {
-        group_by: Primary
+        group_by: Primary where: Primary is not null
         aggregate: 
             FamilyValue is Total {where: PrimaryCode = 100 or SecondaryCode = 100}
         order_by: FamilyValue desc
-        limit: 1
+        limit: 3
     }
     order_by: Total desc
     limit: 5
@@ -186,10 +196,11 @@ run: PeaceCorps -> {
 >>>markdown
 Question 16: What Percentage of resignations fall under each primary reason?
 >>>malloy
+# line_chart
 run: PeaceCorps -> {
-    group_by: Primary
+    group_by: Primary where: Primary is not null
     aggregate:
-        Total
+        --Total
         # percent
         Percentage
     order_by: Percentage desc
@@ -197,6 +208,7 @@ run: PeaceCorps -> {
 >>>markdown
 Question 17: Which Country has the highest proportion of resignations due to the amount of work?
 >>>malloy
+# bar_chart
 run: PeaceCorps -> {
     group_by: CountryID
     aggregate:
@@ -215,11 +227,13 @@ run: PeaceCorps -> {
 >>>markdown
 Question 19: Which Countries had the highest count of resignations due to crime?
 >>>malloy
+# bar_chart
 run: PeaceCorps -> {
     group_by: CountryID
     aggregate:
     CrimeTotal is Total where: PrimaryCode = 510 or SecondaryCode = 510
     order_by: CrimeTotal desc
+    limit: 10
 }
 >>>markdown
 Question 20: Which countries had the highest number of resignations are due to the death of a friend/family member?
@@ -237,8 +251,9 @@ run: PeaceCorps -> {
     group_by: CountryID where: CountryID = 'PCR US RELIEF'
     aggregate:
         Total
+    # bar_chart
     nest: USDATA is {
-        group_by: Primary
+        group_by: Primary where: Primary is not null
         aggregate:
             Total
             -- # percent
@@ -249,10 +264,11 @@ run: PeaceCorps -> {
 >>>markdown
 Question 22: What percentage of resignations fall under each Secondary category?
 >>>malloy
+# line_chart
 run: PeaceCorps -> {
-    group_by: Secondary
+    group_by: Secondary where: Secondary is not null
     aggregate:
-        Total
+        --Total
         # percent
         Percentage
     order_by: Percentage desc
@@ -279,10 +295,10 @@ run: PeaceCorps -> {
 Question 25: How many resignations were filed without a secondary reason?
 >>>malloy
 run: PeaceCorps -> {
-    --group_by: Primary
+    group_by: Primary where: Primary is not null
     aggregate: NoSecondaryTotal is sum(VolID) where: SecondaryCode is null
     order_by: NoSecondaryTotal desc
-    limit: 4
+    limit: 40
 }
 >>>markdown
 Question 26: What countries have the highest proportion of resignations due to host country culture issues?
@@ -331,6 +347,7 @@ run: PeaceCorps -> {
 >>>markdown
 Question 30: Which Countries make up the majority of the issues with the Peace Corps?
 >>>malloy
+# bar_chart
 run: PeaceCorps -> {
     group_by: CountryID
     aggregate:
@@ -387,6 +404,7 @@ run: PeaceCorps -> {
 >>>markdown
 Question 35: What Country had the highest number of romantic partner resignations?
 >>>malloy
+# bar_chart
 run: PeaceCorps -> {
     group_by: CountryID
     aggregate:
@@ -455,6 +473,7 @@ run: PeaceCorps -> {
 >>>markdown
 Question 40: What country had the highest number of resignations due to political issues?
 >>>malloy
+# bar_chart
 run: PeaceCorps -> {
     group_by: CountryID
     aggregate:
